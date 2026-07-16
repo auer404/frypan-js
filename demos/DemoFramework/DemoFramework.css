@@ -1,0 +1,41 @@
+body {
+  margin: 0
+}
+
+canvas {
+  vertical-align: middle;
+  border-right: 1px solid black;
+  position: relative;
+  z-index: 1;
+}
+
+#miniature {
+  position: fixed;
+  right: calc(100% * 1 / 5);
+  top: 50%;
+  transform: translate(50%, -50%);
+  border: 1px dotted grey;
+}
+
+#miniature div {
+  position: absolute;
+  border: 1px solid black;
+  box-sizing: border-box;
+}
+
+#miniature #zoomout,
+#miniature #zoomin {
+  border-radius: 50%;
+  transform: translate(-50%, -50%)
+}
+
+#miniature #zoomout {
+  width: 8px;
+  height: 8px;
+}
+
+#miniature #zoomin {
+  width: 4px;
+  height: 4px;
+  background-color: black;
+}

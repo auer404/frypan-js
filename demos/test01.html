@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FryPan.js - TEST01</title>
+  <link rel="stylesheet" href="DemoFramework/DemoFramework.css" />
+</head>
+
+<body>
+  <canvas></canvas>
+  <script type="module">
+
+    import DemoFramework from "./DemoFramework/DemoFramework";
+    const canvas = document.querySelector("canvas");
+
+    const dimensions = {
+      x: canvas.width / 3,
+      y: canvas.height / 3,
+      width: 50,
+      height: 50,
+    }
+
+    const demo = new DemoFramework({
+      viewportElement: canvas,
+      width: dimensions.x * 2 + dimensions.width,
+      height: dimensions.y * 2 + dimensions.height,
+      maxZoomFactor: 50,
+      minZoomFactor: 0.25,
+      enableMouseWheel: true,
+      mouseWheelTakeover: true,
+      autoZoomCursor: true,
+      enableMouseDrag: true,
+      dragKey: "Space",
+      autoDragCursor: true
+    });
+
+    demo.onDraw = () => {
+
+      demo.ctx.fillStyle = "lightgrey";
+      demo.ctx.beginPath();
+      demo.ctx.rect(
+        demo.scene.data.x,
+        demo.scene.data.y,
+        demo.scene.data.width,
+        demo.scene.data.height
+      );
+      demo.ctx.fill();
+
+      const transposed = demo.scene.transpose({
+        x: dimensions.x,
+        y: dimensions.y
+      })
+
+      demo.ctx.fillStyle = "grey";
+      demo.ctx.beginPath();
+      demo.ctx.rect(
+        transposed.x,
+        transposed.y,
+        demo.scene.scale(dimensions.width),
+        demo.scene.scale(dimensions.height)
+      );
+      demo.ctx.fill();
+
+      demo.ctx.fillStyle = "orange";
+      demo.ctx.beginPath();
+      demo.ctx.ellipse(
+        demo.scene.data.zoomOriginX,
+        demo.scene.data.zoomOriginY,
+        3, 3, 0, 0, 360
+      )
+      demo.ctx.fill();
+
+      demo.ctx.strokeStyle = "orange";
+      demo.ctx.beginPath();
+      demo.ctx.ellipse(
+        demo.scene.data.zoomOutOriginX,
+        demo.scene.data.zoomOutOriginY,
+        5, 5, 0, 0, 360
+      )
+      demo.ctx.stroke();
+    }
+
+
+    demo.canvas.ondblclick = () => {
+      demo.scene.setZoomTo(1);
+      demo.scene.center();
+    }
+
+    demo.scene.trySetView(dimensions);
+
+  </script>
+</body>
+
+</html>

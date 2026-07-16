@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FryPan.js - GRID</title>
+  <link rel="stylesheet" href="DemoFramework/DemoFramework.css" />
+</head>
+
+<body>
+  <canvas></canvas>
+  <script type="module">
+
+    import DemoFramework from "./DemoFramework/DemoFramework";
+    const canvas = document.querySelector("canvas");
+
+    const gridSize = 8;
+
+    const demo = new DemoFramework({
+      viewportElement: canvas,
+      maxZoomFactor: 75,
+      // minZoomFactor: 0.5,
+      // autoResize: false,
+      // intensityCurve: 0,
+      // autoDragCursor:false,
+      // autoZoomCursor: false,
+      enableMouseWheel: true,
+      mouseWheelTakeover: true,
+      autoZoomCursor: true,
+      enableMouseDrag: true,
+      dragKey: "Space",
+      autoDragCursor: true
+    });
+
+    demo.onDraw = () => {
+
+      demo.ctx.strokeStyle = "orange";
+
+      const trueGridSize = gridSize * demo.scene.data.zoomFactor;
+
+      const colsBefore = Math.abs(demo.scene.data.x) / trueGridSize;
+      const xOffset = (colsBefore - Math.floor(colsBefore)) * trueGridSize;
+      const rowsBefore = Math.abs(demo.scene.data.y) / trueGridSize;
+      const yOffset = (rowsBefore - Math.floor(rowsBefore)) * trueGridSize;
+
+      const displayed = demo.scene.getDisplayedPortion();
+
+      const columnsAmount = Math.round(displayed.width / trueGridSize);
+      const rowsAmount = Math.round(displayed.height / trueGridSize);
+
+      for (let c = 0; c <= columnsAmount; c++) {
+
+        const trueX = displayed.x - xOffset + c * trueGridSize;
+
+        demo.ctx.beginPath();
+        demo.ctx.moveTo(trueX, displayed.y);
+        demo.ctx.lineTo(trueX, displayed.y + displayed.height);
+        demo.ctx.stroke();
+
+      }
+
+      for (let r = 0; r <= rowsAmount; r++) {
+
+        const trueY = displayed.y - yOffset + r * trueGridSize;
+
+        demo.ctx.beginPath();
+        demo.ctx.moveTo(displayed.x, trueY);
+        demo.ctx.lineTo(displayed.x + displayed.width, trueY);
+        demo.ctx.stroke();
+
+      }
+    }
+
+  </script>
+</body>
+
+</html>

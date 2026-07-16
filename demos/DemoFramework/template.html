@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FryPan.js - Test template</title>
+  <link rel="stylesheet" href="DemoFramework/DemoFramework.css" />
+</head>
+
+<body>
+  <canvas></canvas>
+  <script type="module">
+
+    import DemoFramework from "./DemoFramework/DemoFramework";
+    const canvas = document.querySelector("canvas");
+
+    const demo = new DemoFramework({
+      viewportElement: canvas
+    });
+
+    demo.onDraw = () => {
+
+    }
+    
+  </script>
+</body>
+
+</html>
