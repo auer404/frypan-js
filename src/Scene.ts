@@ -351,14 +351,19 @@ export default class Scene {
         return { x, y, width, height };
     }
 
-    transpose(options: coordOptions): coordOptions {
+    applyMultiplicator(value: number, multiplicator: number) {
+        return 1 + multiplicator * (value - 1);
+    }
+
+    transpose(options: coordOptions, multiplicator: number = 1): coordOptions {
         const res: coordOptions = {};
+//x = Math.round(this.base_x * this.apply_multiplicator(zd.zoomfactor) + this.apply_multiplicator(zd.x));
 
         if (options.x !== undefined) {
-            res.x = options.x * this.data.zoomFactor + this.data.x;
+            res.x = options.x * this.applyMultiplicator(this.data.zoomFactor, multiplicator) + this.applyMultiplicator(this.data.x, multiplicator);
         }
         if (options.y !== undefined) {
-            res.y = options.y * this.data.zoomFactor + this.data.y;
+            res.y = options.y * this.applyMultiplicator(this.data.zoomFactor, multiplicator) + this.applyMultiplicator(this.data.y, multiplicator);
         }
         return res;
     }
@@ -375,8 +380,8 @@ export default class Scene {
         return res;
     }
 
-    scale(value: number): number {
-        return value * this.data.zoomFactor;
+    scale(value: number, multiplicator: number = 1): number {
+        return value * this.applyMultiplicator(this.data.zoomFactor, multiplicator);
     }
 
     revertScale(value: number): number {

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FryPan.js - Multiplicator</title>
+  <link rel="stylesheet" href="DemoFramework/DemoFramework.css" />
+</head>
+
+<body>
+  <canvas></canvas>
+  <script type="module">
+
+    //TODO :
+    // - Draw in order
+    // - Reverse order if zoomFactor < 1 ?
+    // - Fix zoomFactor < 1 scale (+ transpose ?) formula
+
+    import DemoFramework from "./DemoFramework/DemoFramework";
+    const canvas = document.querySelector("canvas");
+
+    const size = 100;
+
+    const objects = [
+      {
+        x: canvas.offsetWidth / 2,
+        y: window.innerHeight / 2,
+        size,
+        color: "#80ff00a0",
+        multiplicator: 1
+      },
+      {
+        x: canvas.offsetWidth / 2,
+        y: window.innerHeight / 2,
+        size,
+        color: "#ffa600a0",
+        multiplicator: 1.5
+      },
+      {
+        x: canvas.offsetWidth / 2,
+        y: window.innerHeight / 2,
+        size,
+        color: "#00ffdda0",
+        multiplicator: 2
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#80ff00a0",
+        multiplicator: 1
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#ffa600a0",
+        multiplicator: 1.5
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#00ffdda0",
+        multiplicator: 2
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#80ff00a0",
+        multiplicator: 1
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#ffa600a0",
+        multiplicator: 1.5
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight / 3,
+        size,
+        color: "#00ffdda0",
+        multiplicator: 2
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#80ff00a0",
+        multiplicator: 1
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#ffa600a0",
+        multiplicator: 1.5
+      },
+      {
+        x: canvas.offsetWidth / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#00ffdda0",
+        multiplicator: 2
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#80ff00a0",
+        multiplicator: 1
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#ffa600a0",
+        multiplicator: 1.5
+      },
+      {
+        x: canvas.offsetWidth * 2 / 3,
+        y: window.innerHeight * 2 / 3,
+        size,
+        color: "#00ffdda0",
+        multiplicator: 2
+      },
+    ]
+
+    const demo = new DemoFramework({
+      viewportElement: canvas,
+      minZoomFactor: 0.5,
+      maxZoomFactor: 5,
+      enableMouseWheel: true,
+      mouseWheelTakeover: true,
+      autoZoomCursor: true,
+      enableMouseDrag: true,
+      autoDragCursor: true
+    });
+
+    demo.onDraw = () => {
+
+      if (demo.scene.data.zoomFactor < 1) {
+        demo.ctx.fillStyle = "#00000011";
+        demo.ctx.beginPath();
+        demo.ctx.rect(0, 0, demo.canvas.width, demo.canvas.height);
+        demo.ctx.fill();
+      } 
+
+      for (const o of objects) {
+
+        demo.ctx.fillStyle = o.color;
+
+        const x = demo.scene.transpose({x:o.x}, o.multiplicator).x;
+        const y = demo.scene.transpose({y:o.y}, o.multiplicator).y;
+        const radius = demo.scene.scale(o.size / 2, o.multiplicator);
+
+        demo.ctx.beginPath();
+        demo.ctx.ellipse(x, y, radius, radius, 0, 0, 2 * Math.PI);
+        demo.ctx.fill();
+      }
+
+    }
+    
+  </script>
+</body>
+
+</html>

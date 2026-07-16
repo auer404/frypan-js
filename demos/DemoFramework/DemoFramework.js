@@ -1,5 +1,5 @@
 //import FryPan from "../../src/main";
-import FryPan from "./frypan-1.0.0.js"
+import FryPan from "./frypan-1.0.1-multiplicator.js";
 
 export default class DemoFramwork {
 
