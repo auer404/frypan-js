@@ -16,7 +16,8 @@ export type sceneOptions = {
     enablePan?: boolean,
     enableMouseDrag?: boolean,
     dragKey?: string | boolean,
-    autoDragCursor?: boolean
+    autoDragCursor?: boolean,
+    spherical?: boolean
 }
 
 export type sceneSettings = Required<Omit<sceneOptions, "viewportElement" | "width" | "height" | "initialZoomFactor">>;

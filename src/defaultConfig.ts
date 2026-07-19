@@ -17,7 +17,9 @@ const defaultConfig = {
     enablePan: true,
     enableMouseDrag: false,
     dragKey: false,
-    autoDragCursor: false
+    autoDragCursor: false,
+
+    spherical: false
 }
 
 export default defaultConfig;
