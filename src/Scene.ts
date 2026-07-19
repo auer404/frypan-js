@@ -432,6 +432,20 @@ export default class Scene {
         };
     }
 
+    getDisplayedPortion(): rectOptions { //!\ SPHERICAL ?
+
+        const x = this.data.x > 0 ? this.data.x : 0;
+        const y = this.data.y > 0 ? this.data.y : 0;
+
+        const right = this.data.x + this.data.width;
+        const bottom = this.data.y + this.data.height;
+
+        const width = right < this.data.viewportWidth ? right - x : this.data.viewportWidth - x;
+        const height = bottom < this.data.viewportHeight ? bottom - y : this.data.viewportHeight - y;
+
+        return { x, y, width, height };
+    }
+
     transpose(options: coordOptions): coordOptions {
         const res: coordOptions = {};
 

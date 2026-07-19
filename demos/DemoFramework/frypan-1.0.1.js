@@ -14,7 +14,8 @@ var defaultConfig = {
 	enablePan: true,
 	enableMouseDrag: false,
 	dragKey: false,
-	autoDragCursor: false
+	autoDragCursor: false,
+	spherical: false
 };
 //#endregion
 //#region src/Interactions.ts
@@ -144,16 +145,24 @@ var Interactions = class {
 			keydown: (e) => {
 				if ((e.key == s.dragKey || e.code == s.dragKey) && !this.dragKeyDown) {
 					this.dragKeyDown = true;
+					this.parentScene.onDragKeyDown();
 					if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
 				}
-				if ((e.key == s.zoomKey || e.code == s.zoomKey) && !this.zoomKeyDown) this.zoomKeyDown = true;
+				if ((e.key == s.zoomKey || e.code == s.zoomKey) && !this.zoomKeyDown) {
+					this.zoomKeyDown = true;
+					this.parentScene.onZoomKeyDown();
+				}
 			},
 			keyup: (e) => {
 				if (e.key === s.dragKey || e.code == s.dragKey) {
 					this.dragKeyDown = false;
+					this.parentScene.onDragKeyUp();
 					if (s.autoDragCursor) this.surface.style.cursor = "";
 				}
-				if (e.key == s.zoomKey || e.code == s.zoomKey) this.zoomKeyDown = false;
+				if (e.key == s.zoomKey || e.code == s.zoomKey) {
+					this.zoomKeyDown = false;
+					this.parentScene.onZoomKeyUp();
+				}
 			},
 			contextmenu: (e) => {
 				this.callbacks.pointerup(e);
@@ -188,8 +197,8 @@ var Interactions = class {
 			x: newX,
 			y: newY
 		});
-		const cancelX = newX != clamped.x;
-		const cancelY = newY != clamped.y;
+		const cancelX = newX != clamped.x && !this.parentScene.settings.spherical;
+		const cancelY = newY != clamped.y && !this.parentScene.settings.spherical;
 		let finalX = newX;
 		if (cancelX) {
 			if (newX < 0 && this.mouse.directionX == -1 || newX > this.parentScene.data.viewportWidth - this.parentScene.data.width && this.mouse.directionX == 1 || this.mouse.directionX == 0) {
@@ -222,6 +231,14 @@ var Scene = class {
 	observer = null;
 	interactions = null;
 	settings = FryPan.sceneSettings();
+	clones = {
+		width: 1,
+		height: 1,
+		ref: {
+			x: 0,
+			y: 0
+		}
+	};
 	constructor(options) {
 		this.initSettings(options);
 		this.initState(options);
@@ -277,7 +294,11 @@ var Scene = class {
 		this.data.previousZoomFactor = this.data.zoomFactor;
 		this.data.zoomFactor = newZoomValue;
 		const zoomChanged = this.data.previousZoomFactor != this.data.zoomFactor;
-		if (zoomChanged) this.applyZoom();
+		if (zoomChanged) {
+			this.applyZoom();
+			this.updateClones();
+			this.onUpdate();
+		}
 		return zoomChanged;
 	}
 	changeZoomBy(zoomDiff) {
@@ -293,18 +314,19 @@ var Scene = class {
 		if (clampedPosition.y !== void 0) this.data.y = clampedPosition.y;
 		const positionChanged = currPosition.x != this.data.x || currPosition.y != this.data.y;
 		if (positionChanged) {
+			this.updateClones();
 			this.updateRelativeZoomOrigin();
 			this.updateRelativeZoomOutOrigin();
 			this.onUpdate();
 		}
 		return positionChanged;
 	}
-	changePositionBy(options) {
+	changePositionBy(options, clamp = true) {
 		const newPosition = {
 			x: options.x !== void 0 ? this.data.x + options.x : void 0,
 			y: options.y !== void 0 ? this.data.y + options.y : void 0
 		};
-		this.setPositionTo(newPosition);
+		this.setPositionTo(newPosition, clamp);
 	}
 	center() {
 		const x = (this.data.viewportWidth - this.data.width) / 2;
@@ -448,21 +470,84 @@ var Scene = class {
 		if (!isFinite(zoomOutOrigin.x)) zoomOutOrigin.x = centerOffsetAtMinZoom.x;
 		if (!isFinite(zoomOutOrigin.y)) zoomOutOrigin.y = centerOffsetAtMinZoom.y;
 		this.setZoomOutOriginTo(zoomOutOrigin);
-		this.onUpdate();
+	}
+	updateClones() {
+		if (!this.settings.spherical || this.data.width == 0 || this.data.height == 0) return;
+		const margin = {
+			left: this.data.x,
+			right: this.data.viewportWidth - (this.data.x + this.data.width),
+			top: this.data.y,
+			bottom: this.data.viewportHeight - (this.data.y + this.data.height)
+		};
+		this.clones.width = 1;
+		this.clones.height = 1;
+		this.clones.ref = {
+			x: 0,
+			y: 0
+		};
+		if (margin.left > 0) {
+			const left = Math.ceil(margin.left / this.data.width);
+			this.clones.width += left;
+			this.clones.ref.x = left;
+		}
+		if (margin.right > 0) {
+			const right = Math.ceil(margin.right / this.data.width);
+			this.clones.width += right;
+			this.clones.ref.x = this.clones.width - right - 1;
+		}
+		if (margin.top > 0) {
+			const top = Math.ceil(margin.top / this.data.height);
+			this.clones.height += top;
+			this.clones.ref.y = top;
+		}
+		if (margin.bottom > 0) {
+			const bottom = Math.ceil(margin.bottom / this.data.height);
+			this.clones.height += bottom;
+			this.clones.ref.y = this.clones.height - bottom - 1;
+		}
+		const idealX = Math.round((this.clones.width - 1) / 2);
+		const idealY = Math.round((this.clones.height - 1) / 2);
+		const diffX = this.clones.ref.x - idealX;
+		const diffY = this.clones.ref.y - idealY;
+		if (diffX != 0 && !isNaN(diffX)) {
+			const offsetX = -diffX * this.data.width;
+			this.changePositionBy({
+				x: offsetX,
+				y: 0
+			}, false);
+		}
+		if (diffY != 0 && !isNaN(diffY)) {
+			const offsetY = -diffY * this.data.height;
+			this.changePositionBy({
+				x: 0,
+				y: offsetY
+			}, false);
+		}
+	}
+	forEachClone(callback) {
+		for (let y = 0; y < this.clones.height; y++) for (let x = 0; x < this.clones.width; x++) {
+			const offsetX = (x - this.clones.ref.x) * this.data.width;
+			const offsetY = (y - this.clones.ref.y) * this.data.height;
+			const transposeFunction = this.createCloneTransposeFunction(offsetX, offsetY);
+			callback({
+				scene: {
+					x: this.data.x + offsetX,
+					y: this.data.y + offsetY
+				},
+				transpose: transposeFunction
+			});
+		}
 	}
 	coordsInsideViewport(options) {
 		return (options.x !== void 0 || options.y !== void 0) && (options.x === void 0 || options.x >= 0 && options.x <= this.data.viewportWidth) && (options.y === void 0 || options.y >= 0 && options.y <= this.data.viewportHeight);
 	}
-	getDisplayedPortion() {
-		const x = this.data.x > 0 ? this.data.x : 0;
-		const y = this.data.y > 0 ? this.data.y : 0;
-		const right = this.data.x + this.data.width;
-		const bottom = this.data.y + this.data.height;
+	getDisplayRect() {
+		const { x, y, zoomFactor, viewportWidth, viewportHeight } = this.data;
 		return {
-			x,
-			y,
-			width: right < this.data.viewportWidth ? right - x : this.data.viewportWidth - x,
-			height: bottom < this.data.viewportHeight ? bottom - y : this.data.viewportHeight - y
+			x: -x / zoomFactor,
+			y: -y / zoomFactor,
+			width: (viewportWidth - x) / zoomFactor,
+			height: (viewportHeight - y) / zoomFactor
 		};
 	}
 	transpose(options) {
@@ -470,6 +555,16 @@ var Scene = class {
 		if (options.x !== void 0) res.x = options.x * this.data.zoomFactor + this.data.x;
 		if (options.y !== void 0) res.y = options.y * this.data.zoomFactor + this.data.y;
 		return res;
+	}
+	createCloneTransposeFunction(offsetX, offsetY) {
+		const f = (options) => {
+			const res = {};
+			const transposed = this.transpose(options);
+			if (transposed.x !== void 0) res.x = transposed.x + offsetX;
+			if (transposed.y !== void 0) res.y = transposed.y + offsetY;
+			return res;
+		};
+		return f;
 	}
 	revertTranspose(options) {
 		const res = {};
@@ -484,6 +579,10 @@ var Scene = class {
 		return value / this.data.zoomFactor;
 	}
 	onUpdate() {}
+	onZoomKeyDown() {}
+	onZoomKeyUp() {}
+	onDragKeyDown() {}
+	onDragKeyUp() {}
 };
 //#endregion
 //#region src/main.ts
@@ -504,7 +603,8 @@ var FryPan = class {
 			zoomKey: defaultConfig.zoomKey,
 			dragKey: defaultConfig.dragKey,
 			autoZoomCursor: defaultConfig.autoZoomCursor,
-			autoDragCursor: defaultConfig.autoDragCursor
+			autoDragCursor: defaultConfig.autoDragCursor,
+			spherical: defaultConfig.spherical
 		};
 	}
 	static sceneData() {
