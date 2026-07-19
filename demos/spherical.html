@@ -26,7 +26,7 @@
       viewportElement: canvas,
       spherical: true,
       maxZoomFactor: 5,
-      minZoomFactor: 0.5,
+      minZoomFactor: 0.01,
       enableMouseWheel: true,
       mouseWheelTakeover: true,
       autoZoomCursor: true,
@@ -36,19 +36,19 @@
 
     demo.onDraw = () => {
 
-      demo.scene.forEachClone((cloneData) => {
+      demo.scene.forEachClone((clone) => {
 
         demo.ctx.fillStyle = "lightgrey";
         demo.ctx.beginPath();
         demo.ctx.rect(
-          cloneData.scene.x - 1,
-          cloneData.scene.y - 1,
+          clone.scene.x - 1,
+          clone.scene.y - 1,
           demo.scene.data.width + 2,
           demo.scene.data.height + 2
         );
         demo.ctx.fill();
 
-        const transposed = cloneData.transpose({
+        const transposed = clone.transpose({
           x: dimensions.x,
           y: dimensions.y
         })

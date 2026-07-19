@@ -122,14 +122,13 @@ export default class Scene {
         return positionChanged;
     }
 
-    changePositionBy(options: coordOptions) {
+    changePositionBy(options: coordOptions, clamp: boolean = true) {
 
         const newPosition = {
             x: options.x !== undefined ? this.data.x + options.x : undefined,
             y: options.y !== undefined ? this.data.y + options.y : undefined,
         }
-
-        this.setPositionTo(newPosition);
+        this.setPositionTo(newPosition, clamp);
     }
 
     center() {
@@ -370,6 +369,22 @@ export default class Scene {
             this.clones.height += bottom;
             this.clones.ref.y = this.clones.height - bottom - 1;
         }
+
+        const idealX = Math.round((this.clones.width - 1) / 2);
+        const idealY = Math.round((this.clones.height - 1) / 2);
+
+        const diffX = this.clones.ref.x - idealX;
+        const diffY = this.clones.ref.y - idealY;
+
+        if (diffX != 0 && !isNaN(diffX)) {
+            const offsetX = - diffX * this.data.width;
+            this.changePositionBy({x: offsetX , y: 0}, false);
+        }
+
+        if (diffY != 0 && !isNaN(diffY)) {
+            const offsetY = - diffY * this.data.height;
+            this.changePositionBy({x: 0, y: offsetY}, false);
+        }
     }
 
     forEachClone(callback: Function) {
@@ -415,20 +430,6 @@ export default class Scene {
             width: endX,
             height: endY,
         };
-    }
-
-    getDisplayedPortion(): rectOptions { // ! \ SPHERICAL ?
-
-        const x = this.data.x > 0 ? this.data.x : 0;
-        const y = this.data.y > 0 ? this.data.y : 0;
-
-        const right = this.data.x + this.data.width;
-        const bottom = this.data.y + this.data.height;
-
-        const width = right < this.data.viewportWidth ? right - x : this.data.viewportWidth - x;
-        const height = bottom < this.data.viewportHeight ? bottom - y : this.data.viewportHeight - y;
-
-        return { x, y, width, height };
     }
 
     transpose(options: coordOptions): coordOptions {
