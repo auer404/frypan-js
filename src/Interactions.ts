@@ -230,8 +230,8 @@ export default class Interactions {
         const newY = this.dragData.y + distY;
 
         const clamped = this.parentScene.clampPosition({ x: newX, y: newY });
-        const cancelX = newX != clamped.x;
-        const cancelY = newY != clamped.y;
+        const cancelX = newX != clamped.x && !this.parentScene.settings.spherical;
+        const cancelY = newY != clamped.y && !this.parentScene.settings.spherical;
 
         let finalX = newX;
 

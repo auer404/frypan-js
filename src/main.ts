@@ -36,7 +36,8 @@ export default abstract class FryPan {
             zoomKey: defaultConfig.zoomKey,
             dragKey: defaultConfig.dragKey,
             autoZoomCursor: defaultConfig.autoZoomCursor,
-            autoDragCursor: defaultConfig.autoDragCursor
+            autoDragCursor: defaultConfig.autoDragCursor,
+            spherical: defaultConfig.spherical
         }
     }
 

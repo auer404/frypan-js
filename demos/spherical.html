@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FryPan.js - Sperical</title>
+  <link rel="stylesheet" href="DemoFramework/DemoFramework.css" />
+</head>
+
+<body>
+  <canvas></canvas>
+  <script type="module">
+
+    import DemoFramework from "./DemoFramework/DemoFramework.js";
+    const canvas = document.querySelector("canvas");
+
+    const dimensions = {
+      x: canvas.offsetWidth / 3,
+      y: window.innerHeight / 3,
+      width: canvas.offsetWidth / 3,
+      height: window.innerHeight / 3,
+    }
+
+    const demo = new DemoFramework({
+      viewportElement: canvas,
+      spherical: true,
+      maxZoomFactor: 5,
+      minZoomFactor: 0.5,
+      enableMouseWheel: true,
+      mouseWheelTakeover: true,
+      autoZoomCursor: true,
+      enableMouseDrag: true,
+      autoDragCursor: true
+    });
+
+    demo.onDraw = () => {
+
+      demo.scene.forEachClone((cloneData) => {
+
+        demo.ctx.fillStyle = "lightgrey";
+        demo.ctx.beginPath();
+        demo.ctx.rect(
+          cloneData.scene.x - 1,
+          cloneData.scene.y - 1,
+          demo.scene.data.width + 2,
+          demo.scene.data.height + 2
+        );
+        demo.ctx.fill();
+
+        const transposed = cloneData.transpose({
+          x: dimensions.x,
+          y: dimensions.y
+        })
+
+        demo.ctx.fillStyle = "grey";
+        demo.ctx.beginPath();
+        demo.ctx.rect(
+          transposed.x,
+          transposed.y,
+          demo.scene.scale(dimensions.width),
+          demo.scene.scale(dimensions.height)
+        );
+        demo.ctx.fill();
+
+      });
+
+    }
+
+    demo.canvas.ondblclick = () => {
+      demo.scene.setZoomTo(1);
+      demo.scene.center();
+    }
+
+  </script>
+</body>
+
+</html>
