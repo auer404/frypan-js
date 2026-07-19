@@ -550,6 +550,19 @@ var Scene = class {
 			height: (viewportHeight - y) / zoomFactor
 		};
 	}
+	getDisplayedPortion() {
+		//!\ SPHERICAL ?
+		const x = this.data.x > 0 ? this.data.x : 0;
+		const y = this.data.y > 0 ? this.data.y : 0;
+		const right = this.data.x + this.data.width;
+		const bottom = this.data.y + this.data.height;
+		return {
+			x,
+			y,
+			width: right < this.data.viewportWidth ? right - x : this.data.viewportWidth - x,
+			height: bottom < this.data.viewportHeight ? bottom - y : this.data.viewportHeight - y
+		};
+	}
 	transpose(options) {
 		const res = {};
 		if (options.x !== void 0) res.x = options.x * this.data.zoomFactor + this.data.x;
