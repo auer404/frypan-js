@@ -337,6 +337,23 @@ export default class Scene {
         );
     }
 
+    getDisplayRect() {
+
+        const { x, y, zoomFactor, viewportWidth, viewportHeight } = this.data;
+
+        const startX = -x / zoomFactor;
+        const startY = -y / zoomFactor;
+        const endX = (viewportWidth - x) / zoomFactor;
+        const endY = (viewportHeight - y) / zoomFactor;
+
+        return {
+            x: startX,
+            y: startY,
+            width: endX,
+            height: endY,
+        };
+    }
+
     getDisplayedPortion(): rectOptions {
 
         const x = this.data.x > 0 ? this.data.x : 0;
@@ -384,4 +401,8 @@ export default class Scene {
     }
 
     onUpdate() {/* HOOK */ }
+    onZoomKeyDown() {/* HOOK */}
+    onZoomKeyUp() {/* HOOK */}
+    onDragKeyDown() {/* HOOK */}
+    onDragKeyUp() {/* HOOK */}
 }

@@ -149,10 +149,12 @@ export default class Interactions {
 
                 if ((e.key == s.dragKey || e.code == s.dragKey) && !this.dragKeyDown) {
                     this.dragKeyDown = true;
+                    this.parentScene.onDragKeyDown();
                     if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
                 }
                 if ((e.key == s.zoomKey || e.code == s.zoomKey) && !this.zoomKeyDown) {
                     this.zoomKeyDown = true;
+                    this.parentScene.onZoomKeyDown();
                 }
             },
 
@@ -160,10 +162,12 @@ export default class Interactions {
 
                 if (e.key === s.dragKey || e.code == s.dragKey) {
                     this.dragKeyDown = false;
+                    this.parentScene.onDragKeyUp();
                     if (s.autoDragCursor) this.surface.style.cursor = "";
                 }
                 if (e.key == s.zoomKey || e.code == s.zoomKey) {
                     this.zoomKeyDown = false;
+                    this.parentScene.onZoomKeyUp();
                 }
             },
 
