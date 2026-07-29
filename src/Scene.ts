@@ -107,7 +107,9 @@ export default class Scene {
 
     setPositionTo(options: coordOptions, clamp: boolean = true): boolean {
 
-        const clampedPosition = clamp ? this.clampPosition(options) : options;
+        if (this.data.width == 0 || this.data.height == 0) return false;
+
+        const clampedPosition = (clamp && !this.settings.spherical)  ? this.clampPosition(options) : options;
 
         const currPosition = { x: this.data.x, y: this.data.y }
 
@@ -179,12 +181,13 @@ export default class Scene {
         this.data.viewportHeight = options.height as number;
 
         if (this.settings.preserveCenterOnResize) {
+            
             const diff = {
                 x: (this.data.viewportWidth - this.data.previousViewportWidth) / 2,
                 y: (this.data.viewportHeight - this.data.previousViewportHeight) / 2,
             }
 
-            this.changePositionBy(diff);
+            this.changePositionBy(diff, false);
         }
 
         this.onUpdate();
@@ -387,15 +390,15 @@ export default class Scene {
             y: this.data.y
         }
 
-        if (this.data.x > this.data.width) {
+        if (newPosition.x > this.data.width) {
             newPosition.x -= this.data.width;
-        } else if (this.data.x < 0) {
+        } else if (newPosition.x < 0) {
             newPosition.x += this.data.width;
         }
 
-        if (this.data.y > this.data.height) {
+        if (newPosition.y > this.data.height) {
             newPosition.y -= this.data.height;
-        } else if (this.data.y < 0) {
+        } else if (newPosition.y < 0) {
             newPosition.y += this.data.height;
         }
 

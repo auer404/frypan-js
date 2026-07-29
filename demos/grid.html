@@ -20,11 +20,6 @@
     const demo = new DemoFramework({
       viewportElement: canvas,
       maxZoomFactor: 75,
-      // minZoomFactor: 0.5,
-      // autoResize: false,
-      // intensityCurve: 0,
-      // autoDragCursor:false,
-      // autoZoomCursor: false,
       enableMouseWheel: true,
       mouseWheelTakeover: true,
       autoZoomCursor: true,
@@ -39,29 +34,27 @@
 
       const trueGridSize = gridSize * demo.scene.data.zoomFactor;
 
-      const colsBefore = Math.abs(demo.scene.data.x) / trueGridSize;
-      const xOffset = (colsBefore - Math.floor(colsBefore)) * trueGridSize;
-      const rowsBefore = Math.abs(demo.scene.data.y) / trueGridSize;
-      const yOffset = (rowsBefore - Math.floor(rowsBefore)) * trueGridSize;
+      let x = demo.scene.data.x;
+      let y = demo.scene.data.y;
 
-      let x = demo.scene.data.x - xOffset;
-      let y = demo.scene.data.y - yOffset;
+      const bottom = demo.scene.data.y + demo.scene.data.height;
+      const right = demo.scene.data.x + demo.scene.data.width;
 
-      while (x < demo.scene.data.viewportWidth) {
+      while (x < right) {
 
         demo.ctx.beginPath();
-        demo.ctx.moveTo(x, 0);
-        demo.ctx.lineTo(x, demo.scene.data.viewportHeight);
+        demo.ctx.moveTo(x, demo.scene.data.y);
+        demo.ctx.lineTo(x, bottom);
         demo.ctx.stroke();
 
         x += trueGridSize;
       }
 
-      while (y < demo.scene.data.viewportHeight) {
+      while (y < bottom) {
 
         demo.ctx.beginPath();
-        demo.ctx.moveTo(0, y);
-        demo.ctx.lineTo(demo.scene.data.viewportWidth, y);
+        demo.ctx.moveTo(demo.scene.data.x, y);
+        demo.ctx.lineTo(right, y);
         demo.ctx.stroke();
 
         y += trueGridSize;

@@ -60,7 +60,7 @@ export default class Interactions {
             },
 
             mouseleave: () => {
-                if (s.autoDragCursor) this.surface.style.cursor = "";
+                if (s.autoDragCursor) this.releaseCursor();
             },
 
             pointerdown: (e: PointerEvent) => {
@@ -83,7 +83,7 @@ export default class Interactions {
                 this.dragData.y = null;
 
                 if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
-                else if (s.autoDragCursor) this.surface.style.cursor = "";
+                else if (s.autoDragCursor) this.releaseCursor();
             },
 
             pointermove: (e: PointerEvent) => {
@@ -140,7 +140,7 @@ export default class Interactions {
 
                     this.wheelCooldown = window.setTimeout(() => {
                         if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
-                        else this.surface.style.cursor = "";
+                        else this.releaseCursor();
                     }, 250);
                 }
             },
@@ -163,7 +163,7 @@ export default class Interactions {
                 if (e.key === s.dragKey || e.code == s.dragKey) {
                     this.dragKeyDown = false;
                     this.parentScene.onDragKeyUp();
-                    if (s.autoDragCursor) this.surface.style.cursor = "";
+                    if (s.autoDragCursor) this.releaseCursor();
                 }
                 if (e.key == s.zoomKey || e.code == s.zoomKey) {
                     this.zoomKeyDown = false;
@@ -198,6 +198,10 @@ export default class Interactions {
             const target = h.global ? window : this.surface;
             target.removeEventListener(h.eventName, this.callbacks[h.eventName] as EventListener, h.options);
         }
+    }
+
+    releaseCursor() {
+        this.surface.style.cursor = "";
     }
 
     canZoom(): boolean {
