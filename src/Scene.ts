@@ -25,6 +25,8 @@ export default class Scene {
         this.initInteractions();
     }
 
+    //**** INI ****//
+
     initSettings(options: sceneOptions) {
 
         const s = this.settings;
@@ -70,6 +72,8 @@ export default class Scene {
             setTimeout(() => this.onUpdate(), 50);
         }
     }
+
+    //**** API ****//
 
     reset() {
         this.data.x = 0;
@@ -301,11 +305,13 @@ export default class Scene {
             !this.coordsInsideViewport({ y: this.data.y + this.data.height })
         )
 
+        const standardZoomOut = zoomIn || viewportFull || this.settings.spherical;
+
         const origin = {
-            x: zoomIn || viewportFull ? this.data.zoomOriginX : this.data.zoomOutOriginX,
-            y: zoomIn || viewportFull ? this.data.zoomOriginY : this.data.zoomOutOriginY,
-            relX: zoomIn || viewportFull ? this.data.relativeZoomOriginX : this.data.relativeZoomOutOriginX,
-            relY: zoomIn || viewportFull ? this.data.relativeZoomOriginY : this.data.relativeZoomOutOriginY,
+            x: standardZoomOut ? this.data.zoomOriginX : this.data.zoomOutOriginX,
+            y: standardZoomOut ? this.data.zoomOriginY : this.data.zoomOutOriginY,
+            relX: standardZoomOut ? this.data.relativeZoomOriginX : this.data.relativeZoomOutOriginX,
+            relY: standardZoomOut ? this.data.relativeZoomOriginY : this.data.relativeZoomOutOriginY,
         }
 
         const minWidth = this.data.baseWidth * this.settings.minZoomFactor;
@@ -336,7 +342,10 @@ export default class Scene {
     }
 
     updateClones() {
+
         if (!this.settings.spherical || this.data.width == 0 || this.data.height == 0) return;
+
+        this.optimizeClonesPosition();
 
         const margin = {
             left:this.data.x,
@@ -344,6 +353,8 @@ export default class Scene {
             top:this.data.y,
             bottom: this.data.viewportHeight - (this.data.y + this.data.height)
         }
+
+        console.log("margin", margin);
 
         this.clones.width = 1;
         this.clones.height = 1;
@@ -370,25 +381,36 @@ export default class Scene {
             this.clones.ref.y = this.clones.height - bottom - 1;
         }
 
-        const idealX = Math.round((this.clones.width - 1) / 2);
-        const idealY = Math.round((this.clones.height - 1) / 2);
+        console.log("clones", this.clones);
+    }
 
-        const diffX = this.clones.ref.x - idealX;
-        const diffY = this.clones.ref.y - idealY;
+    optimizeClonesPosition() {
 
-        if (diffX != 0 && !isNaN(diffX)) {
-            const offsetX = - diffX * this.data.width;
-            this.changePositionBy({x: offsetX , y: 0}, false);
+        const newPosition = {
+            x: this.data.x,
+            y: this.data.y
         }
 
-        if (diffY != 0 && !isNaN(diffY)) {
-            const offsetY = - diffY * this.data.height;
-            this.changePositionBy({x: 0, y: offsetY}, false);
+        if (this.data.x > this.data.width) {
+            newPosition.x -= this.data.width;
+        } else if (this.data.x < 0) {
+            newPosition.x += this.data.width;
+        }
+
+        if (this.data.y > this.data.height) {
+            newPosition.y -= this.data.height;
+        } else if (this.data.y < 0) {
+            newPosition.y += this.data.height;
+        }
+
+        if (newPosition.x != this.data.x || newPosition.y != this.data.y) {
+            this.setPositionTo(newPosition, false);
         }
     }
 
-    forEachClone(callback: Function) {
-        
+    forEachClone(callback: (clone: {scene: {x: number, y: number}, transpose: Function}) => void) {
+        //^ RENAME scene argument
+
         for (let y = 0; y < this.clones.height; y++) {
             for (let x = 0; x < this.clones.width; x++) {
 
@@ -415,24 +437,37 @@ export default class Scene {
         );
     }
 
-    getDisplayRect() {
+    getDisplayRect(offset: coordOptions | null = null) : rectOptions {
 
-        const { x, y, zoomFactor, viewportWidth, viewportHeight } = this.data;
+        const { zoomFactor, viewportWidth, viewportHeight } = this.data;
+        const x = (offset && offset.x !== undefined) ? offset.x : this.data.x;
+        const y = (offset && offset.y !== undefined) ? offset.y : this.data.y;
 
-        const startX = -x / zoomFactor;
-        const startY = -y / zoomFactor;
+        const startX = - x / zoomFactor;
+        const startY = - y / zoomFactor;
         const endX = (viewportWidth - x) / zoomFactor;
         const endY = (viewportHeight - y) / zoomFactor;
 
         return {
             x: startX,
             y: startY,
-            width: endX,
-            height: endY,
+            width: endX - startX,
+            height: endY - startY,
         };
     }
 
-    getDisplayedPortion(): rectOptions { //!\ SPHERICAL ?
+    getClonesDisplayRects(): rectOptions[] {
+
+        const rects: rectOptions[] = [];
+
+        this.forEachClone((clone) => {
+            const { x, y } = clone.scene;
+            rects.push(this.getDisplayRect({x, y}));
+        });
+        return rects;
+    }
+
+    getDisplayedPortion(): rectOptions { //!\ TODO : SPHERICAL OR DELETE
 
         const x = this.data.x > 0 ? this.data.x : 0;
         const y = this.data.y > 0 ? this.data.y : 0;
@@ -486,9 +521,17 @@ export default class Scene {
         return value / this.data.zoomFactor;
     }
 
-    onUpdate() {/* HOOK */ }
-    onZoomKeyDown() {/* HOOK */}
-    onZoomKeyUp() {/* HOOK */}
-    onDragKeyDown() {/* HOOK */}
-    onDragKeyUp() {/* HOOK */}
+    changeSetting(key: string, value: any) {
+        const s = this.settings as Record<string, any>;
+        s[key] = value;
+        //console.log(key, this.settings[key]);
+    }
+
+    //**** HOOKS ****//
+
+    onUpdate() {}
+    onZoomKeyDown() {}
+    onZoomKeyUp() {}
+    onDragKeyDown() {}
+    onDragKeyUp() {}
 }
