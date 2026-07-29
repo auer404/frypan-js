@@ -354,8 +354,6 @@ export default class Scene {
             bottom: this.data.viewportHeight - (this.data.y + this.data.height)
         }
 
-        console.log("margin", margin);
-
         this.clones.width = 1;
         this.clones.height = 1;
         this.clones.ref = {x: 0, y:0};
@@ -380,8 +378,6 @@ export default class Scene {
             this.clones.height += bottom;
             this.clones.ref.y = this.clones.height - bottom - 1;
         }
-
-        console.log("clones", this.clones);
     }
 
     optimizeClonesPosition() {
@@ -408,8 +404,7 @@ export default class Scene {
         }
     }
 
-    forEachClone(callback: (clone: {scene: {x: number, y: number}, transpose: Function}) => void) {
-        //^ RENAME scene argument
+    forEachClone(callback: (clone: {position: {x: number, y: number}, transpose: Function}) => void) {
 
         for (let y = 0; y < this.clones.height; y++) {
             for (let x = 0; x < this.clones.width; x++) {
@@ -420,7 +415,7 @@ export default class Scene {
                 const transposeFunction = this.createCloneTransposeFunction(offsetX, offsetY);
                 
                 callback({
-                    scene: {x: this.data.x + offsetX, y: this.data.y +  offsetY},
+                    position: {x: this.data.x + offsetX, y: this.data.y +  offsetY},
                     transpose: transposeFunction
                 });
             }
@@ -461,24 +456,10 @@ export default class Scene {
         const rects: rectOptions[] = [];
 
         this.forEachClone((clone) => {
-            const { x, y } = clone.scene;
+            const { x, y } = clone.position;
             rects.push(this.getDisplayRect({x, y}));
         });
         return rects;
-    }
-
-    getDisplayedPortion(): rectOptions { //!\ TODO : SPHERICAL OR DELETE
-
-        const x = this.data.x > 0 ? this.data.x : 0;
-        const y = this.data.y > 0 ? this.data.y : 0;
-
-        const right = this.data.x + this.data.width;
-        const bottom = this.data.y + this.data.height;
-
-        const width = right < this.data.viewportWidth ? right - x : this.data.viewportWidth - x;
-        const height = bottom < this.data.viewportHeight ? bottom - y : this.data.viewportHeight - y;
-
-        return { x, y, width, height };
     }
 
     transpose(options: coordOptions): coordOptions {
@@ -524,7 +505,6 @@ export default class Scene {
     changeSetting(key: string, value: any) {
         const s = this.settings as Record<string, any>;
         s[key] = value;
-        //console.log(key, this.settings[key]);
     }
 
     //**** HOOKS ****//

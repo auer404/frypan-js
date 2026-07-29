@@ -14,11 +14,11 @@
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
   },
-  "main": "./dist/frypan-1.0.0.js",
-  "module": "./dist/frypan-1.0.0.js",
+  "main": "./dist/frypan-1.0.1.js",
+  "module": "./dist/frypan-1.0.1.js",
   "exports": {
-    ".": "./dist/frypan-1.0.0.js",
-    "./min": "./dist/frypan-1.0.0.min.js",
-    "./dev/*": "./dist/frypan-1.0.0/*.js"
+    ".": "./dist/frypan-1.0.1.js",
+    "./min": "./dist/frypan-1.0.1.min.js",
+    "./dev/*": "./dist/frypan-1.0.1-dev/*.js"
   }
 }
