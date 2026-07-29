@@ -15,15 +15,10 @@
     import DemoFramework from "./DemoFramework/DemoFramework.js";
     const canvas = document.querySelector("canvas");
 
-    const dimensions = {
-      x: canvas.offsetWidth / 3,
-      y: window.innerHeight / 3,
-      width: canvas.offsetWidth / 3,
-      height: window.innerHeight / 3,
-    }
-
     const demo = new DemoFramework({
       viewportElement: canvas,
+      width: 400,
+      height: 400,
       spherical: true,
       maxZoomFactor: 5,
       minZoomFactor: 0.1,
@@ -38,30 +33,22 @@
 
       demo.scene.forEachClone((clone) => {
 
-        demo.ctx.fillStyle = "lightgrey";
+        demo.ctx.strokeStyle = "orange";
+
         demo.ctx.beginPath();
         demo.ctx.rect(
-          clone.position.x - 1,
-          clone.position.y - 1,
-          demo.scene.data.width + 2,
-          demo.scene.data.height + 2
+          clone.position.x,
+          clone.position.y,
+          demo.scene.data.width,
+          demo.scene.data.height
         );
-        demo.ctx.fill();
 
-        const transposed = clone.transpose({
-          x: dimensions.x,
-          y: dimensions.y
-        })
+        if (clone.scene.x == demo.scene.data.x && clone.scene.y == demo.scene.data.y) {
+          demo.ctx.fillStyle = "yellow";
+          demo.ctx.fill();
+        }
 
-        demo.ctx.fillStyle = "grey";
-        demo.ctx.beginPath();
-        demo.ctx.rect(
-          transposed.x,
-          transposed.y,
-          demo.scene.scale(dimensions.width),
-          demo.scene.scale(dimensions.height)
-        );
-        demo.ctx.fill();
+        demo.ctx.stroke();
 
       });
 

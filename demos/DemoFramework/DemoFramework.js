@@ -25,7 +25,7 @@ export default class DemoFramwork {
 
         window.addEventListener("resize", () => {
             this.resizeCanvas();
-            this.draw(); //? "HACK"
+            this.draw();
         });
     }
 
