@@ -1,20 +1,23 @@
-/*//TODO
+/*
+TODO --- 1.0.1
 
-- FIX? : cursor release (see : Game of Life / Game.ts : 101)
+- npm pack / proper CDN
+- doc
 
----
+TODO --- 1.0.2
 
-- Clean demos + doc
-
----
-
-- multiplicator
-- hooks
+- private props
+- forEachClone interface ?
 - minZoomFactor > 0
 - maxZoomFactor >= minZoomFactor
-- setup.fluidSize > scene auto-resizes according to viewportSize
 
--- Top-down game engine test/integration (MODS >> 1.1)
+TODO --- 1.?.?
+
+- hooks
+- setup.fluidSize > scene auto-resizes according to viewportSize
+- multiplicator
+
+- Top-down game engine test/integration //* > 1.1
 
 */
 

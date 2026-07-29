@@ -85,7 +85,7 @@ var Interactions = class {
 				if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
 			},
 			mouseleave: () => {
-				if (s.autoDragCursor) this.surface.style.cursor = "";
+				if (s.autoDragCursor) this.releaseCursor();
 			},
 			pointerdown: (e) => {
 				this.isFocused = true;
@@ -104,7 +104,7 @@ var Interactions = class {
 				this.dragData.x = null;
 				this.dragData.y = null;
 				if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
-				else if (s.autoDragCursor) this.surface.style.cursor = "";
+				else if (s.autoDragCursor) this.releaseCursor();
 			},
 			pointermove: (e) => {
 				if (document.hasFocus()) this.isFocused = true;
@@ -138,7 +138,7 @@ var Interactions = class {
 					clearTimeout(this.wheelCooldown);
 					this.wheelCooldown = window.setTimeout(() => {
 						if (this.canDrag() && s.autoDragCursor) this.surface.style.cursor = "grab";
-						else this.surface.style.cursor = "";
+						else this.releaseCursor();
 					}, 250);
 				}
 			},
@@ -157,7 +157,7 @@ var Interactions = class {
 				if (e.key === s.dragKey || e.code == s.dragKey) {
 					this.dragKeyDown = false;
 					this.parentScene.onDragKeyUp();
-					if (s.autoDragCursor) this.surface.style.cursor = "";
+					if (s.autoDragCursor) this.releaseCursor();
 				}
 				if (e.key == s.zoomKey || e.code == s.zoomKey) {
 					this.zoomKeyDown = false;
@@ -180,6 +180,9 @@ var Interactions = class {
 	}
 	destroy() {
 		for (const h of this.handlers) (h.global ? window : this.surface).removeEventListener(h.eventName, this.callbacks[h.eventName], h.options);
+	}
+	releaseCursor() {
+		this.surface.style.cursor = "";
 	}
 	canZoom() {
 		return this.parentScene.settings.enableZoom && this.parentScene.settings.enableMouseWheel && (this.zoomKeyDown || this.parentScene.settings.zoomKey === false);
@@ -305,7 +308,8 @@ var Scene = class {
 		return this.setZoomTo(this.data.zoomFactor + zoomDiff);
 	}
 	setPositionTo(options, clamp = true) {
-		const clampedPosition = clamp ? this.clampPosition(options) : options;
+		if (this.data.width == 0 || this.data.height == 0) return false;
+		const clampedPosition = clamp && !this.settings.spherical ? this.clampPosition(options) : options;
 		const currPosition = {
 			x: this.data.x,
 			y: this.data.y
@@ -365,7 +369,7 @@ var Scene = class {
 				x: (this.data.viewportWidth - this.data.previousViewportWidth) / 2,
 				y: (this.data.viewportHeight - this.data.previousViewportHeight) / 2
 			};
-			this.changePositionBy(diff);
+			this.changePositionBy(diff, false);
 		}
 		this.onUpdate();
 	}
@@ -513,10 +517,10 @@ var Scene = class {
 			x: this.data.x,
 			y: this.data.y
 		};
-		if (this.data.x > this.data.width) newPosition.x -= this.data.width;
-		else if (this.data.x < 0) newPosition.x += this.data.width;
-		if (this.data.y > this.data.height) newPosition.y -= this.data.height;
-		else if (this.data.y < 0) newPosition.y += this.data.height;
+		if (newPosition.x > this.data.width) newPosition.x -= this.data.width;
+		else if (newPosition.x < 0) newPosition.x += this.data.width;
+		if (newPosition.y > this.data.height) newPosition.y -= this.data.height;
+		else if (newPosition.y < 0) newPosition.y += this.data.height;
 		if (newPosition.x != this.data.x || newPosition.y != this.data.y) this.setPositionTo(newPosition, false);
 	}
 	forEachClone(callback) {
