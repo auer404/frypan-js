@@ -1,5 +1,9 @@
 /*//TODO
 
+- FIX? : cursor release (see : Game of Life / Game.ts : 101)
+
+---
+
 - Clean demos + doc
 
 ---
