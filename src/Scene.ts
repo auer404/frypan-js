@@ -86,6 +86,11 @@ export default class Scene {
         this.observer?.disconnect();
     }
 
+    enable(mode: boolean = true) {
+        this.changeSetting("enableZoom", mode);
+        this.changeSetting("enablePan", mode);
+    }
+
     setZoomTo(newZoomValue: number): boolean {
 
         newZoomValue = Math.max(Math.min(newZoomValue, this.settings.maxZoomFactor), this.settings.minZoomFactor);
