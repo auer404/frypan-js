@@ -292,6 +292,10 @@ var Scene = class {
 		this.interactions?.destroy();
 		this.observer?.disconnect();
 	}
+	enable(mode = true) {
+		this.changeSetting("enableZoom", mode);
+		this.changeSetting("enablePan", mode);
+	}
 	setZoomTo(newZoomValue) {
 		newZoomValue = Math.max(Math.min(newZoomValue, this.settings.maxZoomFactor), this.settings.minZoomFactor);
 		this.data.previousZoomFactor = this.data.zoomFactor;
